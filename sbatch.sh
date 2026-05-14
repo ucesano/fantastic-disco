@@ -15,4 +15,6 @@ module load CUDA/11.8.0
 
 make
 
-./bin/spmv mtx/cage15.mtx
+hostname
+
+./bin/spmv mtx/Maragal_8.mtx

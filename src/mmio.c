@@ -1,3 +1,12 @@
+/*
+*   Matrix Market I/O library for ANSI C
+*
+*   See http://math.nist.gov/MatrixMarket for details.
+*
+*
+*/
+
+
 #include <stdio.h>
 #include <string.h>
 #include <stdlib.h>
@@ -60,12 +69,12 @@ int mm_read_unsymmetric_sparse(const char *fname, int *M_, int *N_, int *nz_,
     *J_ = J;
 
     /* NOTE: when reading in floats, ANSI C requires the use of the "l"  */
-    /*   specifier as in "%f", "%lf", "%le", otherwise errors will occur */
+    /*   specifier as in "%g", "%lf", "%le", otherwise errors will occur */
     /*  (ANSI C X3.159-1989, Sec. 4.9.6.2, p. 136 lines 13-15)            */
 
     for (i=0; i<nz; i++)
     {
-        fscanf(f, "%d %d %f\n", &I[i], &J[i], &val[i]);
+        fscanf(f, "%d %d %g\n", &I[i], &J[i], &val[i]);
         I[i]--;  /* adjust from 1-based to 0-based */
         J[i]--;
     }
@@ -207,6 +216,7 @@ int mm_read_mtx_crd_size(FILE *f, int *M, int *N, int *nz )
     return 0;
 }
 
+
 int mm_read_mtx_array_size(FILE *f, int *M, int *N)
 {
     char line[MM_MAX_LINE_LENGTH];
@@ -259,14 +269,14 @@ int mm_read_mtx_crd_data(FILE *f, int M, int N, int nz, int I[], int J[],
     if (mm_is_complex(matcode))
     {
         for (i=0; i<nz; i++)
-            if (fscanf(f, "%d %d %f %f", &I[i], &J[i], &val[2*i], &val[2*i+1])
+            if (fscanf(f, "%d %d %g %g", &I[i], &J[i], &val[2*i], &val[2*i+1])
                 != 4) return MM_PREMATURE_EOF;
     }
     else if (mm_is_real(matcode))
     {
         for (i=0; i<nz; i++)
         {
-            if (fscanf(f, "%d %d %f\n", &I[i], &J[i], &val[i])
+            if (fscanf(f, "%d %d %g\n", &I[i], &J[i], &val[i])
                 != 3) return MM_PREMATURE_EOF;
 
         }
@@ -290,12 +300,12 @@ int mm_read_mtx_crd_entry(FILE *f, int *I, int *J,
 {
     if (mm_is_complex(matcode))
     {
-            if (fscanf(f, "%d %d %f %f", I, J, real, imag)
+            if (fscanf(f, "%d %d %g %g", I, J, real, imag)
                 != 4) return MM_PREMATURE_EOF;
     }
     else if (mm_is_real(matcode))
     {
-            if (fscanf(f, "%d %d %f\n", I, J, real)
+            if (fscanf(f, "%d %d %g\n", I, J, real)
                 != 3) return MM_PREMATURE_EOF;
 
     }
@@ -386,8 +396,7 @@ int mm_write_banner(FILE *f, MM_typecode matcode)
         return 0;
 }
 
-int mm_write_mtx_crd(char fname[], int M, int N, int nz, int I[], int J[],
-        float val[], MM_typecode matcode)
+int mm_write_mtx_crd(char fname[], int M, int N, int nz, int I[], int J[], float val[], MM_typecode matcode)
 {
     FILE *f;
     int i;
@@ -437,16 +446,16 @@ int mm_write_mtx_crd(char fname[], int M, int N, int nz, int I[], int J[],
 */
 char *mm_strdup(const char *s)
 {
-	int len = strlen(s);
-	char *s2 = (char *) malloc((len+1)*sizeof(char));
-	return strcpy(s2, s);
+    int len = strlen(s);
+    char *s2 = (char *) malloc((len+1)*sizeof(char));
+    return strcpy(s2, s);
 }
 
 char  *mm_typecode_to_str(MM_typecode matcode)
 {
     char buffer[MM_MAX_LINE_LENGTH];
     char *types[4];
-	char *mm_strdup(const char *);
+    char *mm_strdup(const char *);
     int error =0;
 
     /* check for MTX type */
