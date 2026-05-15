@@ -49,7 +49,6 @@ static void display_card_informations(void)
 
     for (int i = 0; i < devCount; ++i)
     {
-        // Get device properties
         printf("\nCUDA Device #%d\n", i);
         cudaDeviceProp devProp;
         cudaGetDeviceProperties(&devProp, i);
@@ -59,10 +58,11 @@ static void display_card_informations(void)
 
 int main(int argc, char ** argv)
 {
-    int         deviceCount = 0;
-	cudaError_t error_id    = cudaGetDeviceCount(&deviceCount);
+    int deviceCount = 0;
+	cudaError_t error_id = cudaGetDeviceCount(&deviceCount);
 
-    if (error_id != cudaSuccess) {
+    if (error_id != cudaSuccess)
+    {
         printf("cudaGetDeviceCount returned %d\n-> %s\n", static_cast<int>(error_id), cudaGetErrorString(error_id));
         printf("Result = FAIL\n");
         exit(EXIT_FAILURE);
@@ -72,9 +72,10 @@ int main(int argc, char ** argv)
 
     MM_typecode matcode;
     FILE *f;
+    int i;
     int M, N, nz;
-    int i, *I, *J;
-    float *val;
+    int *I, *O, *J, *row_nz;
+    float *val, *X;
 
     unsigned long init[4]={0x123, 0x234, 0x345, 0x456}, length=4;
     init_by_array(init, length);
@@ -82,22 +83,21 @@ int main(int argc, char ** argv)
     if (argc < 2)
     {
         fprintf(stderr, "Usage: %s [martix-market-filename]\n", argv[0]);
-        exit(1);
+        exit(EXIT_FAILURE);
     }
     else
     {
         if ((f = fopen(argv[1], "r")) == NULL)
-            exit(1);
+            exit(EXIT_FAILURE);
     }
 
     if (mm_read_banner(f, &matcode) != 0)
     {
         printf("Could not process Matrix Market banner.\n");
-        exit(1);
+        exit(EXIT_FAILURE);
     }
 
-    if (mm_is_complex(matcode) && mm_is_matrix(matcode) &&
-            mm_is_sparse(matcode) )
+    if (mm_is_complex(matcode) && mm_is_matrix(matcode) && mm_is_sparse(matcode))
     {
         printf("Sorry, this application does not support ");
         printf("Market Market type: [%s]\n", mm_typecode_to_str(matcode));
@@ -106,7 +106,7 @@ int main(int argc, char ** argv)
 
     /* finding out size of sparse matrix. */
     if ((ret_code = mm_read_mtx_crd_size(f, &M, &N, &nz)) != 0)
-        exit(1);
+        exit(EXIT_FAILURE);
 
     /* reserving memory for COO representation. */
     I = (int *) malloc(nz * (1 + mm_is_symmetric(matcode)) * sizeof(int));
@@ -163,33 +163,32 @@ int main(int argc, char ** argv)
 
     mm_sort_coo(I, J, val, nz);
 
-    int * O = (int *) malloc((M + 1) * sizeof(int));
-
+    O = (int *)calloc((M + 1), sizeof(int));
     mm_coo_to_csr_row_ptr(I, nz, M, O);
 
-    int *row_nz = (int *)calloc(M, sizeof(int));
+    row_nz = (int *)calloc(M, sizeof(int));
     for (i = 0; i < nz; ++i) row_nz[I[i]]++;
 
-    float *X;
     X = (float *) malloc(N * sizeof(float));
     for (i = 0; i < N; i++) X[i] = (float)genrand_real1() + 1.f;
 
-    struct results coo = spmv_gpu_coo_prof(I, J, val, M, N, nz, row_nz, X);
-    struct results csr = spmv_gpu_csr_prof(O, J, val, M, N, nz, row_nz, X);
+    struct results coo     = spmv_gpu_coo_prof(I, J, val, M, N, nz, row_nz, X);
+    struct results csr     = spmv_gpu_csr_prof(O, J, val, M, N, nz, row_nz, X);
     struct results csr_opt = spmv_gpu_csr_opt_prof(O, J, val, M, N, nz, row_nz, X);
 
-    display_card_informations();
-    fprintf(stdout, "file: %s\n", argv[1]);
-    print_results(coo, "coo");
-    print_results(csr, "csr");
-    print_results(csr_opt, "csr (warp)");
-
+    free(row_nz);
     free(X);
-
     free(O);
     free(I);
     free(J);
     free(val);
+
+    display_card_informations();
+
+    fprintf(stdout, "file: %s\n", argv[1]);
+    print_results(coo, "coo");
+    print_results(csr, "csr");
+    print_results(csr_opt, "csr (warp)");
 
     return ret_code;
 }

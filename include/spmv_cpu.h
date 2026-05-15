@@ -1,34 +1,18 @@
 #ifndef SPMV_CPU_H
 #define SPMV_CPU_H
 
-void spmv_cpu_coo(const int * I,
-                  const int * J,
-                  const float * val,
+void spmv_cpu_coo(const int *__restrict__ I,
+                  const int *__restrict__ J,
+                  const float *__restrict__ val,
                   const int nz,
-                  const float * X,
-                  float * Y);
+                  const float *__restrict__ X,
+                  float *__restrict__ Y);
 
-void spmv_cpu_csr(const int * O,
-                  const int * J,
-                  const float * val,
+void spmv_cpu_csr(const int *__restrict__ O,
+                  const int *__restrict__ J,
+                  const float *__restrict__ val,
                   const int M,
-                  const float * X,
-                  float * Y);
-
-void spmv_cpu_ell(const int * ell_J,
-                  const float * ell_val,
-                  const int M,
-                  const int max_nz,
-                  const float * X,
-                  float * Y);
-
-void spmv_cpu_sell_c(const int * sell_O,
-                     const int * sell_J,
-                     const float * sell_val,
-                     const int M,
-                     const int C,
-                     const int num_slices,
-                     const float * X,
-                     float * Y);
+                  const float *__restrict__ X,
+                  float *__restrict__ Y);
 
 #endif
