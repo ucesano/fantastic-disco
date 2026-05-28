@@ -169,8 +169,8 @@ int main(int argc, char ** argv)
     row_nz = (int *)calloc(M, sizeof(int));
     for (i = 0; i < nz; ++i) row_nz[I[i]]++;
 
-    X = (float *) malloc(N * sizeof(float));
-    for (i = 0; i < N; i++) X[i] = (float)genrand_real1() + 1.f;
+    X = (float *)malloc(N * sizeof(float));
+    for (i = 0; i < N; i++) X[i] = 100.f * (float)genrand_real1() + 1.f;
 
     struct results coo     = spmv_gpu_coo_prof(I, J, val, M, N, nz, row_nz, X);
     struct results csr     = spmv_gpu_csr_prof(O, J, val, M, N, nz, row_nz, X);

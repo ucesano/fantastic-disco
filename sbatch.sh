@@ -17,4 +17,4 @@ make
 
 hostname
 
-./bin/spmv mtx/Maragal_8.mtx
+./bin/spmv mtx/F1.mtx
