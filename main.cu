@@ -109,9 +109,11 @@ int main(int argc, char ** argv)
             exit(EXIT_FAILURE);
 
         /* reserving memory for COO representation. */
-        I = (int *) malloc(nz * (1 + mm_is_symmetric(matcode)) * sizeof(int));
-        J = (int *) malloc(nz * (1 + mm_is_symmetric(matcode)) * sizeof(int));
-        val = (float *) malloc(nz * (1 + mm_is_symmetric(matcode)) * sizeof(float));
+        size_t n = (size_t) nz * (1 + mm_is_symmetric(matcode));
+
+        cudaHostAlloc((void **) &I,   n * sizeof(int),   cudaHostAllocDefault);
+        cudaHostAlloc((void **) &J,   n * sizeof(int),   cudaHostAllocDefault);
+        cudaHostAlloc((void **) &val, n * sizeof(float), cudaHostAllocDefault);
 
         if (mm_is_general(matcode))
         {
@@ -163,13 +165,14 @@ int main(int argc, char ** argv)
 
         mm_sort_coo(I, J, val, nz);
 
-        O = (int *)calloc((M + 1), sizeof(int));
+        cudaHostAlloc((void **) &O, (M + 1) * sizeof(int), cudaHostAllocDefault);
+        memset(O, 0, (M + 1) * sizeof(int));
         mm_coo_to_csr_row_ptr(I, nz, M, O);
 
         row_nz = (int *)calloc(M, sizeof(int));
         for (i = 0; i < nz; ++i) row_nz[I[i]]++;
 
-        X = (float *)malloc(N * sizeof(float));
+        cudaHostAlloc((void **) &X, N * sizeof(float), cudaHostAllocDefault);
         for (i = 0; i < N; i++) X[i] = 100.f * (float)genrand_real1() + 1.f;
 
         struct results coo     = spmv_gpu_coo_prof(I, J, val, M, N, nz, row_nz, X);
@@ -177,11 +180,11 @@ int main(int argc, char ** argv)
         struct results csr_opt = spmv_gpu_csr_opt_prof(O, J, val, M, N, nz, row_nz, X);
 
         free(row_nz);
-        free(X);
-        free(O);
-        free(I);
-        free(J);
-        free(val);
+        cudaFreeHost(X);
+        cudaFreeHost(O);
+        cudaFreeHost(I);
+        cudaFreeHost(J);
+        cudaFreeHost(val);
 
         display_card_informations();
 
