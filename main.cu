@@ -64,10 +64,12 @@ int main(int argc, char ** argv)
 
     if (error_id != cudaSuccess)
     {
-        printf("cudaGetDeviceCount returned %d\n-> %s\n", static_cast<int>(error_id), cudaGetErrorString(error_id));
+        fprintf(stderr, "cudaGetDeviceCount returned %d\n-> %s\n", static_cast<int>(error_id), cudaGetErrorString(error_id));
         printf("Result = FAIL\n");
         exit(EXIT_FAILURE);
     }
+
+    display_card_informations();
 
     int ret_code;
 
@@ -191,8 +193,6 @@ int main(int argc, char ** argv)
         cudaFreeHost(I);
         cudaFreeHost(J);
         cudaFreeHost(val);
-
-        display_card_informations();
 
         fprintf(stdout, "file: %s\n", argv[fi]);
         print_results(coo, "coo");
