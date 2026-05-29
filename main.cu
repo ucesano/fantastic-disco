@@ -4,7 +4,8 @@
 #include <cuda_runtime.h>
 
 #ifdef __cplusplus
-extern "C" {
+extern "C"
+{
 #endif
 
 #include "include/mmio.h"
@@ -149,16 +150,21 @@ int main(int argc, char ** argv)
             int *tI, *tJ;
             float *tval;
 
-            tI = (int *)realloc(I, nz * sizeof(int));
-            tJ = (int *)realloc(J, nz * sizeof(int));
-            tval = (float *)realloc(val, nz * sizeof(float));
+            n = (size_t) nz;
 
-            if (tI != NULL && tJ != NULL && tval != NULL)
-            {
-                I = tI;
-                J = tJ;
-                val = tval;
-            }
+            cudaHostAlloc((void **) &tI,   n * sizeof(int),   cudaHostAllocDefault);
+            cudaHostAlloc((void **) &tJ,   n * sizeof(int),   cudaHostAllocDefault);
+            cudaHostAlloc((void **) &tval, n * sizeof(float), cudaHostAllocDefault);
+
+            memcpy(tI,   I,   n * sizeof(int));
+            memcpy(tJ,   J,   n * sizeof(int));
+            memcpy(tval, val, n * sizeof(float));
+
+            cudaFreeHost(I);
+            cudaFreeHost(J);
+            cudaFreeHost(val);
+
+            I = tI;  J = tJ;  val = tval;
         }
 
         fclose(f);
