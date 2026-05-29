@@ -89,6 +89,9 @@ int main(int argc, char ** argv)
         exit(EXIT_FAILURE);
     }
 
+    fputs("The following matrices will be used:\n", stderr);
+    for (int fi = 1; fi < argc; ++fi) fprintf(stderr, "  - %s\n", argv[fi]);
+
     for (int fi = 1; fi < argc; ++fi)
     {
         if ((f = fopen(argv[fi], "r")) == NULL)
@@ -196,8 +199,8 @@ int main(int argc, char ** argv)
 
         fprintf(stdout, "file: %s\n", argv[fi]);
         print_results(coo, "coo");
-        print_results(csr, "csr");
-        print_results(csr_opt, "csr (warp)");
+        print_results(csr, "csr (scalar)");
+        print_results(csr_opt, "csr (vector)");
     }
 
     return EXIT_SUCCESS;

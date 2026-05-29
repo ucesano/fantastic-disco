@@ -42,8 +42,17 @@ struct results spmv_gpu_coo_prof(const int * I,
 
     float *Y, *Ybis;
 
-    Y = (float *)calloc(M, sizeof(float));
-    Ybis = (float *)calloc(M, sizeof(float));
+    // Y = (float *)calloc(M, sizeof(float));
+    // Ybis = (float *)calloc(M, sizeof(float));
+
+    cudaHostAlloc((void **) &Y, M * sizeof(float), cudaHostAllocDefault);
+    cudaHostAlloc((void **) &Ybis, M * sizeof(float), cudaHostAllocDefault);
+
+    for (int i = 0; i < M, i++)
+    {
+        Y[i] = 0.;
+        Ybis[i] = 0.;
+    }
 
     int *dI, *dJ;
     float *dval, *dX, *dY;
@@ -155,8 +164,8 @@ struct results spmv_gpu_coo_prof(const int * I,
     fprintf(stderr, "max relative error = %.2e\n", max_rel);
     fprintf(stderr, "max absolute error = %.2e\n", max_abs);
 
-    free(Y);
-    free(Ybis);
+    cudaFreeHost(Y);
+    cudaFreeHost(Ybis);
 
     return res;
 }
@@ -174,8 +183,14 @@ struct results spmv_gpu_csr_prof(const int * O,
 
     float *Y, *Ybis;
 
-    Y = (float *)calloc(M, sizeof(float));
-    Ybis = (float *)calloc(M, sizeof(float));
+    cudaHostAlloc((void **) &Y, M * sizeof(float), cudaHostAllocDefault);
+    cudaHostAlloc((void **) &Ybis, M * sizeof(float), cudaHostAllocDefault);
+
+    for (int i = 0; i < M, i++)
+    {
+        Y[i] = 0.;
+        Ybis[i] = 0.;
+    }
 
     int *dO, *dJ;
     float *dval, *dX, *dY;
@@ -266,8 +281,8 @@ struct results spmv_gpu_csr_prof(const int * O,
     fprintf(stderr, "max relative error = %.2e\n", max_rel);
     fprintf(stderr, "max absolute error = %.2e\n", max_abs);
 
-    free(Y);
-    free(Ybis);
+    cudaFreeHost(Y);
+    cudaFreeHost(Ybis);
 
     return res;
 }
@@ -285,8 +300,14 @@ struct results spmv_gpu_csr_opt_prof(const int * O,
 
     float *Y, *Ybis;
 
-    Y = (float *)calloc(M, sizeof(float));
-    Ybis = (float *)calloc(M, sizeof(float));
+    cudaHostAlloc((void **) &Y, M * sizeof(float), cudaHostAllocDefault);
+    cudaHostAlloc((void **) &Ybis, M * sizeof(float), cudaHostAllocDefault);
+
+    for (int i = 0; i < M, i++)
+    {
+        Y[i] = 0.;
+        Ybis[i] = 0.;
+    }
 
     int *dO, *dJ;
     float *dval, *dX, *dY;
@@ -378,8 +399,8 @@ struct results spmv_gpu_csr_opt_prof(const int * O,
     fprintf(stderr, "max relative error = %.2e\n", max_rel);
     fprintf(stderr, "max absolute error = %.2e\n", max_abs);
 
-    free(Y);
-    free(Ybis);
+    cudaFreeHost(Y);
+    cudaFreeHost(Ybis);
 
     return res;
 }

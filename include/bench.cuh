@@ -1,7 +1,7 @@
 #ifndef BENCH_H
 #define BENCH_H
 
-#define WARMUP 10
+#define WARMUP 20
 #define ITERATION 30
 
 struct results
